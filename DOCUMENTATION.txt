@@ -2,3 +2,7 @@
 # 1 localhost/footseason/year                       :  Diff football seasons in a year
 # 2 localhost/footseason/season_id/leaguetable      :  League table for a specific season
 # 3 localhost/footteam/team_id/playerinfo 	    :  Player info for specific Team
+
+
+# 1 localhost/youtube_search/search                 :  search is given by user 
+						      search_format:: search words separated by _ 	
