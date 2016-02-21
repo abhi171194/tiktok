@@ -1,2 +1,4 @@
-/cric  - information about cricket
-/fball - information about football
+# 0 localhost					    :  Formal page
+# 1 localhost/footseason/year                       :  Diff football seasons in a year
+# 2 localhost/footseason/season_id/leaguetable      :  League table for a specific season
+# 3 localhost/footteam/team_id/playerinfo 	    :  Player info for specific Team

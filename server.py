@@ -7,20 +7,7 @@ app= Flask(__name__)
 import requests
 from pprint import pprint
 import json
-'''
-yr=str(football.year)       # extract year
-j_seas=football.j_season
-season_id=str(football.sea_id)    # season id into string
-#print season_id 
-seasontable=football.sea_table
-
-# Seasontable
-if len(seasontable)==0:
-    seasontable.append("The resouce not found")
-#pprint(seasontable)
-'''    
-
-
+ 
     
 @app.route('/',methods=['GET'])
 def get_task():
@@ -33,14 +20,10 @@ def season(year):
     season="/v1/soccerseasons/"
     url_season=host+season+"?season="+year
     
-   # headers = { 'X-Auth-Token':'649ae96933574e51a97ef5dcca3b6340'}
     r=requests.get(url_season,headers = { 'X-Auth-Token':'649ae96933574e51a97ef5dcca3b6340', 'X-Response-Control': 'minified' })
     j_season=json.loads(r.content)
     if 'error' in j_season or len(j_season)==0 :
-        return jsonify({'Seasons':'No Data present Enter year from 2013 to 2016'})
-   # for item in j_season:
-   #     del item['_links']
-    
+        return jsonify({'Seasons':'No Data present Enter year from 2013 to 2016'}) 
     return jsonify({'Seasons':j_season})
 
 @app.route('/footseason/<string:season_id>/leaguetable',methods=['GET'])
@@ -69,7 +52,6 @@ def team_player(team_id):
     j=json.loads(r.content)
     if 'error' in j:
         return jsonify(j)
-   # del j["Team_players_info"]
     
     return jsonify({'Team_players_info':j})
 
