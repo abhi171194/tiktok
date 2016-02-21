@@ -1,0 +1,2 @@
+/cric  - information about cricket
+/fball - information about football
