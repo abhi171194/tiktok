@@ -1,8 +1,15 @@
+server_new_football.py
 # 0 localhost					    :  Formal page
-# 1 localhost/footseason/year                       :  Diff football seasons in a year
-# 2 localhost/footseason/season_id/leaguetable      :  League table for a specific season
-# 3 localhost/footteam/team_id/playerinfo 	    :  Player info for specific Team
+# 1 localhost/footseason/{year}                       :  Diff football seasons in a year
+# 2 localhost/footseason/{season_id}/leaguetable      :  League table for a specific season
+# 3 localhost/footteam/{team_id}/playerinfo 	    :  Player info for specific Team
+
+fc_club.py
+# 1 localhost/youtube_search/{User_types_here}      :  search is given by user 
+						      search_format:: search words separated by _ 
+# 2 localhost/f_news                                :  Not working 
 
 
-# 1 localhost/youtube_search/search                 :  search is given by user 
-						      search_format:: search words separated by _ 	
+News.py
+# 1 localhost/foot    			   	    :   Football News Trending List 
+# 2 localhost/foot/{news_id}			    :   Detailed News
