@@ -35,15 +35,26 @@ def not_found(error):
     return make_response(jsonify( { 'error': 'Not found' } ), 404)
 
 @app.route('/')
-@auth.login_required
 def ho():
-    return "successfull"
+    return jsonify({"registration" : "/register/username/password"})
+
+@app.route('/register/<string:username>/<string:password>')
+def reg(username,password):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM login WHERE username = '" + username + "'")
+    ry = cur.fetchall()
+    if(len(ry)!=0):
+        return make_response(jsonify( { 'error': 'username already exist' } ), 409)
+    else:
+     cur.execute("INSERT INTO login VALUES ( '" + username + "','" + password + "')")
+     conn.commit()
+     return jsonify({"accepted" : username})
 
 
 
 
 @app.route('/footseason/<string:year>',methods=['GET'])   #
-#@auth.login_required
+@auth.login_required
 def season(year):
     host="http://api.football-data.org"
     season="/v1/soccerseasons/"
@@ -56,7 +67,8 @@ def season(year):
     if(len(rv)!=0):
      sea_table2=[]
      for abc in rv:
-         sea_table2.append({"id":abc[0], "caption":abc[1], "currentmatchday":abc[2], "lastUpdated":abc[3], "league":abc[4], "numberOfGames":abc[5], "numberOfMatchdays":abc[6], "numberOfTeams":abc[7], "year":abc[8], })
+      sea_table2.append({"id":abc[0], "caption":abc[1], "currentmatchday":abc[2], "lastUpdated":abc[3], "league":abc[4], "numberOfGames":abc[5], "numberOfMatchdays":abc[6], "numberOfTeams":abc[7], "year":abc[8], })
+     cur.execute("UPDATE leaguesinfo SET count = count+1 WHERE year = " + year)
      return jsonify({'SeasonTable':sea_table2})
     else:
         r=requests.get(url_season,headers = { 'X-Auth-Token':'649ae96933574e51a97ef5dcca3b6340', 'X-Response-Control': 'minified' })
@@ -71,9 +83,9 @@ def season(year):
             cur.execute("SELECT COUNT(*) FROM leaguesinfo having MAX(count)")
             rs1 = cur.fetchone()
             if(rs1[0]>18):
-               cur.execute("""DELETE FROM leaguesinfo WHERE count = ( SELECT maxo
+               cur.execute("""DELETE FROM leaguesinfo WHERE count = ( SELECT mino
          FROM
-           ( SELECT MAX(count) AS maxo
+           ( SELECT MIN(count) AS mino
              FROM leaguesinfo
            ) AS tmp
         )""")
@@ -81,7 +93,7 @@ def season(year):
 
         for abc2 in j_season:
             cur = conn.cursor()
-            cur.execute("INSERT INTO leaguesinfo VALUES ( '" + str(abc2["caption"]) + "'," + "32" + "," + str(int(abc2["id"])) + ",'" + str(abc2["lastUpdated"]) + "','" + str(abc2["league"]) + "'," + str(int(abc2["numberOfGames"])) + "," + str(int(abc2["numberOfMatchdays"])) + "," + str(int(abc2["numberOfTeams"])) + "," + str(int(abc2["year"])) + "," + "1" + "," + time.strftime("%Y/%m/%d") + time.strftime("%H:%M:%S") + ")" )
+            cur.execute("INSERT INTO leaguesinfo VALUES ( '" + str(abc2["caption"]) + "'," + "32" + "," + str(int(abc2["id"])) + ",'" + str(abc2["lastUpdated"]) + "','" + str(abc2["league"]) + "'," + str(int(abc2["numberOfGames"])) + "," + str(int(abc2["numberOfMatchdays"])) + "," + str(int(abc2["numberOfTeams"])) + "," + str(int(abc2["year"])) + "," + "1" + ",'" + str(time.strftime("%Y/%m/%d")) + str(time.strftime("%H:%M:%S")) + "')" )
             conn.commit()
 
             #print  str(abc["caption"]) + "`," + str(int(abc["currentMatchday"])) + "," + str(int(abc["id"])) + ",`" + str(abc["lastUpdated"]) + "`,`" + str(abc["league"]) + "`," + str(int(abc["numberOfGames"])) + "," + str(int(abc["numberOfMatchdays"])) + "," + str(int(abc["numberOfTeams"])) + "," + str(int(abc["year"]))
@@ -113,6 +125,7 @@ def season_table(season_id):
     return jsonify({'PointsTable':sea_table})
 
 host="https://www.youtube.com/results?search_query="
+
 @app.route('/youtube_search/<string:search>',methods=['GET'])
 @auth.login_required
 def club_info(search):
@@ -124,21 +137,50 @@ def club_info(search):
     soup=BeautifulSoup(r.content)
     s=soup.find_all("h3",{"class":"yt-lockup-title "})
     list1=[]
-    ab=[]
+    ab2=[]
     cur = conn.cursor()
-    cur.execute()
-    for item in s:
+    cur.execute("SELECT * FROM searchinfo WHERE searched = '" +  search + "'")
+    rg = cur.fetchall()
+    if(len(rg)!=0):
+        for links in rg:
+         ab2.append({"Video_name":links[1],"link":links[4],"Duration":links[5]})
+         cur.execute("UPDATE searchinfo SET count = count+1 WHERE searched = '" + search + "'")
+        return jsonify({'List_complete_top_5':ab2})
+    else:
+     print "here"
+     cur.execute("SELECT COUNT(*) FROM searchinfo ")
+     rf = cur.fetchone()
+     print rf[0]
+     if(rf[0]>50):
+         cur.execute("""SELECT searched FROM searchinfo WHERE count = ( SELECT mino
+         FROM
+           ( SELECT MIN(count) AS mino
+             FROM searchinfo
+           ) AS tmp
+         )""")
+         rj = cur.fetchone()
+         cur.execute("DELETE FROM searchinfo where searched = '" + rj[0] + "'")
+         conn.commit()
+     ab=[]
+     for item in s:
         li=item.find_all("a")
         dur=str(item.find_all("span")[0].text)
         st=str(li[0].get("href"))
         st="https://www.youtube.com"+st
         title=li[0].text
         list1.append({"Video_name":title,"link":st,"Duration":dur})
+
     t=1
     for a in list1:
         if(t<6):
             ab.append(a)
             t+=1
+        else:
+            break
+    for v in ab:
+      cur.execute("INSERT INTO searchinfo VALUES ( '" + search + "','" + v["Video_name"] +  "','" + str(time.strftime("%Y/%m/%d")) + str(time.strftime("%H:%M:%S")) + "'," + '1' + ",'" + str((v["link"])) + "','" + str(v["Duration"]) + "')")
+
+    conn.commit()
     return jsonify({'List_complete_top_5':ab})
 
 
